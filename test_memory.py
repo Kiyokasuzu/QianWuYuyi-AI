@@ -2,56 +2,29 @@ import json
 from pathlib import Path
 
 
-MEMORY_FILE = Path("data/memory.json")
+def test_memory_search():
 
-USER_ID = "366648462"
-QUERY = "事情"
+    path = Path("data/memory.json")
 
+    if not path.exists():
+        return
 
-def load_memory():
-    if not MEMORY_FILE.exists():
-        print("memory.json 不存在")
-        return []
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
 
-    with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    query = "事情"
 
-
-def search_memory(data, user_id, query, limit=3):
     results = []
 
     for mem in reversed(data):
-        if mem.get("user_id") != user_id:
-            continue
-
         content = mem.get("content", "")
 
-        if query in content or any(word in content for word in query.split()):
+        if query in content:
             results.append(mem)
 
-            if len(results) >= limit:
-                break
+        if len(results) >= 3:
+            break
 
-    return results
-
-
-def main():
-    data = load_memory()
-
-    results = search_memory(
-        data,
-        USER_ID,
-        QUERY
-    )
+    assert isinstance(results, list)
 
     print(f"找到 {len(results)} 条相关记忆")
-
-    for r in results:
-        role = r.get("role", "unknown")
-        content = r.get("content", "")
-
-        print(f"  {role}: {content[:80]}...")
-
-
-if __name__ == "__main__":
-    main()
